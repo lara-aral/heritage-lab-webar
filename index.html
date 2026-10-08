@@ -2,136 +2,211 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
+
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, user-scalable=no">
 
     <title>Heritage-LAB WebAR</title>
 
+
     <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
 
     <!-- MindAR -->
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
+
     <style>
+
         html, body {
             margin: 0;
             padding: 0;
+
             width: 100%;
             height: 100%;
+
             overflow: hidden;
+
             font-family: Arial, sans-serif;
+
+            /* Evita che il browser interpreti il gesto
+               come scroll/zoom della pagina */
+            touch-action: none;
         }
 
-        /* Pannello dell'interfaccia */
+
+        /* -------------------------
+           INTERFACCIA
+        ------------------------- */
+
         #interface {
+
             position: fixed;
+
             left: 0;
             bottom: 0;
+
             width: 100%;
+
             box-sizing: border-box;
 
             padding: 20px;
 
             background: rgba(0, 0, 0, 0.75);
+
             color: white;
 
             z-index: 1000;
+
+            /* I pulsanti devono continuare
+               a ricevere i tocchi */
+            touch-action: auto;
         }
+
 
         #interface h1 {
+
             margin: 0 0 8px 0;
+
             font-size: 22px;
+
         }
+
 
         #interface p {
+
             margin: 0 0 15px 0;
+
             font-size: 15px;
+
         }
 
+
         .button {
+
             display: inline-block;
 
             padding: 12px 18px;
+
             margin-right: 8px;
 
             border-radius: 8px;
+
             border: none;
 
             background: white;
+
             color: black;
 
             text-decoration: none;
+
             font-size: 15px;
+
             font-weight: bold;
 
             cursor: pointer;
+
         }
+
 
         .button:hover {
+
             opacity: 0.85;
+
         }
 
-        /* Messaggio iniziale */
+
+        /* -------------------------
+           LOADING
+        ------------------------- */
+
         #loading {
+
             position: fixed;
+
             inset: 0;
 
             display: flex;
+
             align-items: center;
+
             justify-content: center;
 
             background: #111;
+
             color: white;
 
             z-index: 2000;
 
             font-size: 18px;
+
         }
+
     </style>
+
 </head>
 
 
 <body>
 
-    <!-- Schermata iniziale -->
+
+    <!-- -------------------------
+         SCHERMATA INIZIALE
+    ------------------------- -->
+
     <div id="loading">
+
         Avvio della realtà aumentata...
+
     </div>
 
 
-    <!-- Interfaccia -->
+
+    <!-- -------------------------
+         INTERFACCIA
+    ------------------------- -->
+
     <div id="interface">
 
-        <h1>Clarence Bicknell</h1>
+        <h1><i>Pisa chiragra</i></h1>
 
         <p>
             Inquadra l'immagine per visualizzare il modello 3D.
         </p>
 
-        <!-- Link esterno -->
+
         <a
             class="button"
-            href="https://www.project-miage.it/"
+            href="https://distav.unige.it/en/heritage-lab"
             target="_blank"
             rel="noopener noreferrer">
-            Visita il sito
+
+            Scopri Heritage-Lab
+
         </a>
 
-        <!-- Esempio di altro pulsante -->
+
         <a
             class="button"
-            href="https://sketchfab.com/"
+            href="https://sketchfab.com/3d-models/pisa-chiragra-41f6f563ea0448f5bc67f8a6eb767ad2"
             target="_blank"
             rel="noopener noreferrer">
+
             Modello 3D
+
         </a>
 
     </div>
 
 
-    <!-- SCENA AR -->
+
+    <!-- -------------------------
+         SCENA AR
+    ------------------------- -->
+
     <a-scene
+
         mindar-image="
             imageTargetSrc: ./targets.mind;
             maxTrack: 1;
@@ -139,27 +214,49 @@
             uiScanning: no;
             uiError: no;
         "
+
         embedded
+
         color-space="sRGB"
-        renderer="colorManagement: true, physicallyCorrectLights"
+
+        renderer="
+            colorManagement: true,
+            physicallyCorrectLights
+        "
+
         vr-mode-ui="enabled: false"
+
         device-orientation-permission-ui="enabled: false">
 
 
-        <!-- Camera -->
+        <!-- CAMERA -->
+
         <a-camera
+
             position="0 0 0"
+
             look-controls="enabled: false">
+
         </a-camera>
 
 
-        <!-- Target -->
-        <a-entity mindar-image-target="targetIndex: 0">
+
+        <!-- -------------------------
+             TARGET
+        ------------------------- -->
+
+        <a-entity
+            mindar-image-target="targetIndex: 0">
 
 
-            <!-- MODELLO 3D -->
+            <!-- -------------------------
+                 MODELLO 3D
+            ------------------------- -->
 
             <a-gltf-model
+
+                id="model"
+
                 src="./Pisa_Chiragra.glb"
 
                 position="0 0 0"
@@ -167,64 +264,409 @@
                 rotation="0 0 0"
 
                 scale="20 20 20">
+
             </a-gltf-model>
 
 
         </a-entity>
 
+
     </a-scene>
 
 
+
+    <!-- -------------------------
+         JAVASCRIPT
+    ------------------------- -->
+
     <script>
 
-        const loading = document.getElementById("loading");
 
-        const scene = document.querySelector("a-scene");
+        /* =========================
+           ELEMENTI
+        ========================= */
 
-
-        /*
-         * Quando MindAR è pronto,
-         * eliminiamo la schermata di caricamento.
-         */
-
-        scene.addEventListener("arReady", function () {
-
-            loading.style.display = "none";
-
-        });
+        const loading =
+            document.getElementById("loading");
 
 
-        /*
-         * Se l'immagine viene riconosciuta.
-         */
+        const scene =
+            document.querySelector("a-scene");
 
-        const target = document.querySelector(
-            "[mindar-image-target]"
+
+        const model =
+            document.getElementById("model");
+
+
+        const target =
+            document.querySelector(
+                "[mindar-image-target]"
+            );
+
+
+
+        /* =========================
+           LOADING
+        ========================= */
+
+        scene.addEventListener(
+            "arReady",
+            function () {
+
+                loading.style.display = "none";
+
+            }
         );
 
 
-        target.addEventListener("targetFound", function () {
 
-            console.log("Immagine riconosciuta!");
+        /* =========================
+           TARGET TROVATO
+        ========================= */
 
-        });
+        target.addEventListener(
+            "targetFound",
+            function () {
+
+                console.log(
+                    "Immagine riconosciuta!"
+                );
+
+            }
+        );
 
 
-        /*
-         * Se l'immagine non è più visibile.
-         */
 
-        target.addEventListener("targetLost", function () {
+        /* =========================
+           TARGET PERSO
+        ========================= */
 
-            console.log("Immagine persa.");
+        target.addEventListener(
+            "targetLost",
+            function () {
 
-        });
+                console.log(
+                    "Immagine persa."
+                );
+
+            }
+        );
+
+
+
+        /* =========================
+           CONTROLLI TOUCH
+        ========================= */
+
+
+        let isDragging = false;
+
+        let previousX = 0;
+
+        let previousY = 0;
+
+
+        /* Scala iniziale */
+
+        let currentScale = 20;
+
+
+        /* Limiti dello zoom */
+
+        const MIN_SCALE = 5;
+
+        const MAX_SCALE = 300;
+
+
+        /* Distanza tra due dita */
+
+        let initialPinchDistance = null;
+
+        let initialPinchScale = currentScale;
+
+
+
+        /* =========================
+           FUNZIONE:
+           DISTANZA TRA DUE DITA
+        ========================= */
+
+        function getDistance(touch1, touch2) {
+
+            const dx =
+                touch1.clientX - touch2.clientX;
+
+            const dy =
+                touch1.clientY - touch2.clientY;
+
+            return Math.sqrt(
+                dx * dx + dy * dy
+            );
+
+        }
+
+
+
+        /* =========================
+           TOUCH START
+        ========================= */
+
+        document.addEventListener(
+            "touchstart",
+            function (event) {
+
+
+                /* Ignora i tocchi
+                   sull'interfaccia */
+
+                if (
+                    event.target.closest("#interface")
+                ) {
+
+                    return;
+
+                }
+
+
+                /* -------------------------
+                   UN DITO
+                ------------------------- */
+
+                if (
+                    event.touches.length === 1
+                ) {
+
+                    isDragging = true;
+
+                    previousX =
+                        event.touches[0].clientX;
+
+                    previousY =
+                        event.touches[0].clientY;
+
+                }
+
+
+                /* -------------------------
+                   DUE DITA
+                ------------------------- */
+
+                if (
+                    event.touches.length === 2
+                ) {
+
+                    isDragging = false;
+
+
+                    initialPinchDistance =
+                        getDistance(
+                            event.touches[0],
+                            event.touches[1]
+                        );
+
+
+                    initialPinchScale =
+                        currentScale;
+
+                }
+
+            },
+            { passive: false }
+        );
+
+
+
+        /* =========================
+           TOUCH MOVE
+        ========================= */
+
+        document.addEventListener(
+            "touchmove",
+            function (event) {
+
+
+                /* Ignora l'interfaccia */
+
+                if (
+                    event.target.closest("#interface")
+                ) {
+
+                    return;
+
+                }
+
+
+                event.preventDefault();
+
+
+
+                /* =====================
+                   ROTAZIONE
+                ===================== */
+
+                if (
+                    event.touches.length === 1 &&
+                    isDragging
+                ) {
+
+
+                    const currentX =
+                        event.touches[0].clientX;
+
+
+                    const currentY =
+                        event.touches[0].clientY;
+
+
+                    const deltaX =
+                        currentX - previousX;
+
+
+                    const deltaY =
+                        currentY - previousY;
+
+
+                    /* Recuperiamo la rotazione
+                       attuale */
+
+                    const rotation =
+                        model.getAttribute(
+                            "rotation"
+                        );
+
+
+                    /*
+                     * Movimento orizzontale:
+                     * rotazione Y
+                     */
+
+                    rotation.y +=
+                        deltaX * 0.5;
+
+
+                    /*
+                     * Movimento verticale:
+                     * rotazione X
+                     */
+
+                    rotation.x +=
+                        deltaY * 0.5;
+
+
+                    model.setAttribute(
+                        "rotation",
+                        rotation
+                    );
+
+
+                    previousX = currentX;
+
+                    previousY = currentY;
+
+                }
+
+
+
+                /* =====================
+                   PINCH ZOOM
+                ===================== */
+
+                if (
+                    event.touches.length === 2 &&
+                    initialPinchDistance !== null
+                ) {
+
+
+                    const currentDistance =
+                        getDistance(
+                            event.touches[0],
+                            event.touches[1]
+                        );
+
+
+                    const scaleFactor =
+                        currentDistance /
+                        initialPinchDistance;
+
+
+                    currentScale =
+                        initialPinchScale *
+                        scaleFactor;
+
+
+                    /* Limiti */
+
+                    currentScale =
+                        Math.max(
+                            MIN_SCALE,
+                            Math.min(
+                                MAX_SCALE,
+                                currentScale
+                            )
+                        );
+
+
+                    /* Applica la scala */
+
+                    model.setAttribute(
+                        "scale",
+                        `${currentScale} ${currentScale} ${currentScale}`
+                    );
+
+                }
+
+            },
+            { passive: false }
+        );
+
+
+
+        /* =========================
+           TOUCH END
+        ========================= */
+
+        document.addEventListener(
+            "touchend",
+            function (event) {
+
+
+                if (
+                    event.touches.length === 0
+                ) {
+
+                    isDragging = false;
+
+                    initialPinchDistance = null;
+
+                }
+
+
+                /*
+                 * Se rimane un dito dopo
+                 * il pinch, ripartiamo
+                 * dalla sua posizione.
+                 */
+
+                if (
+                    event.touches.length === 1
+                ) {
+
+                    isDragging = true;
+
+                    previousX =
+                        event.touches[0].clientX;
+
+                    previousY =
+                        event.touches[0].clientY;
+
+                }
+
+            }
+        );
+
 
     </script>
 
+
 </body>
 </html>
-```
-
-
-
