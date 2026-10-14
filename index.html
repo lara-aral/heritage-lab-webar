@@ -232,57 +232,51 @@
 
         // Gestione del riconoscimento delle immagini
         
-        document.querySelectorAll("[mindar-image-target]").forEach(
-            function (targetElement) {
+       
+scene.addEventListener("loaded", function () {
+  document.querySelectorAll("[mindar-image-target]").forEach(function (targetElement) {
+    const component = targetElement.components["mindar-image-target"];
+    const index = Number(component?.data?.targetIndex);
 
-                const index = Number(
-                    targetElement.getAttribute("mindar-image-target")
-                        .targetIndex
-                );
+    console.log("Target inizializzato:", index);
 
-                console.log("Target inizializzato:", index);
+    if (!Number.isInteger(index) || !objects[index]) {
+      console.error("Target non valido:", index, component?.data);
+      return;
+    }
 
-targetElement.addEventListener("targetFound", function() {
-  console.log("EVENTO targetFound:", index);
+    targetElement.addEventListener("targetFound", function () {
+      console.log("targetFound:", index);
+
+      const data = objects[index];
+
+      activeTargetIndex = index;
+      setActiveModel(data.model);
+
+      objectTitle.textContent = data.title;
+      objectDescription.textContent = data.description;
+      sketchfabLink.href = data.sketchfab;
+
+      instruction.style.display = "none";
+      interfaceBox.style.display = "block";
+
+      console.log("Interfaccia aggiornata:", data.title);
+    });
+
+    targetElement.addEventListener("targetLost", function () {
+      if (activeTargetIndex !== index) return;
+
+      activeTargetIndex = null;
+      activeModel = null;
+
+      interfaceBox.style.display = "none";
+      instruction.style.display = "block";
+
+      console.log("Target perso:", index);
+    });
+  });
 });
 
-targetElement.addEventListener("targetLost", function() {
-  console.log("EVENTO targetLost:", index);
-});
-
-                targetElement.addEventListener("targetFound", function () {
-                    const data = objects[index];
-
-                    if (!data) return;
-
-                    activeTargetIndex = index;
-                    setActiveModel(data.model);
-                   
-
-                    objectTitle.textContent = data.title;
-                    objectDescription.textContent = data.description;
-                    sketchfabLink.href = data.sketchfab;
-
-                    instruction.style.display = "none";
-                    interfaceBox.style.display = "block";
-
-                    console.log("Immagine riconosciuta:", data.title);
-                });
-
-                targetElement.addEventListener("targetLost", function () {
-                    // Evita di nascondere l'interfaccia di un altro target
-                    if (activeTargetIndex !== index) return;
-
-                    activeTargetIndex = null;
-                    activeModel = null;
-
-                    interfaceBox.style.display = "none";
-                    instruction.style.display = "block";
-
-                    console.log("Immagine non più visibile.");
-                });
-            }
-        );
 
     
        // GESTI TOUCH: ROTAZIONE E ZOOM
