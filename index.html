@@ -2,211 +2,143 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, user-scalable=no">
 
     <title>Heritage-LAB WebAR</title>
 
-
     <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-
 
     <!-- MindAR -->
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
-
     <style>
-
         html, body {
             margin: 0;
             padding: 0;
-
             width: 100%;
             height: 100%;
-
             overflow: hidden;
-
             font-family: Arial, sans-serif;
-
-            /* Evita che il browser interpreti il gesto
-               come scroll/zoom della pagina */
             touch-action: none;
         }
 
-
-        /* -------------------------
-           INTERFACCIA
-        ------------------------- */
-
-        #interface {
-
+        /* Messaggio iniziale */
+        #instruction {
             position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 85%;
+            max-width: 420px;
+            box-sizing: border-box;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            text-align: center;
+            font-size: 20px;
+            line-height: 1.5;
+            border-radius: 12px;
+            z-index: 1000;
+        }
 
+        /* Scheda informativa del modello */
+        #interface {
+            display: none;
+            position: fixed;
             left: 0;
             bottom: 0;
-
             width: 100%;
-
             box-sizing: border-box;
-
-            padding: 20px;
-
-            background: rgba(0, 0, 0, 0.75);
-
+            padding: 18px;
+            background: rgba(0, 0, 0, 0.78);
             color: white;
-
             z-index: 1000;
-
-            /* I pulsanti devono continuare
-               a ricevere i tocchi */
             touch-action: auto;
         }
 
-
         #interface h1 {
-
             margin: 0 0 8px 0;
-
             font-size: 22px;
-
         }
-
 
         #interface p {
-
             margin: 0 0 15px 0;
-
             font-size: 15px;
-
+            line-height: 1.4;
         }
-
 
         .button {
-
             display: inline-block;
-
-            padding: 12px 18px;
-
-            margin-right: 8px;
-
+            padding: 12px 15px;
+            margin: 0 6px 6px 0;
             border-radius: 8px;
-
             border: none;
-
             background: white;
-
             color: black;
-
             text-decoration: none;
-
-            font-size: 15px;
-
+            font-size: 14px;
             font-weight: bold;
-
             cursor: pointer;
-
         }
-
 
         .button:hover {
-
             opacity: 0.85;
-
         }
 
-
-        /* -------------------------
-           LOADING
-        ------------------------- */
-
+        /* Schermata di caricamento */
         #loading {
-
             position: fixed;
-
             inset: 0;
-
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-
             background: #111;
-
             color: white;
-
             z-index: 2000;
-
             font-size: 18px;
-
         }
-
     </style>
-
 </head>
-
 
 <body>
 
-
-    <!-- -------------------------
-         SCHERMATA INIZIALE
-    ------------------------- -->
-
+    <!-- Schermata iniziale di caricamento -->
     <div id="loading">
-
         Avvio della realtà aumentata...
-
     </div>
 
+    <!-- Messaggio mostrato quando nessuna immagine è riconosciuta -->
+    <div id="instruction">
+        Inquadra l'immagine sul fronte della carta per iniziare
+    </div>
 
-
-    <!-- -------------------------
-         INTERFACCIA
-    ------------------------- -->
-
+    <!-- Interfaccia dinamica -->
     <div id="interface">
+        <h1 id="objectTitle"></h1>
 
-        <h1><i>Pisa chiragra</i> (Fabricius, 1775)</h1>
+        <p id="objectDescription"></p>
 
-        <p>
-            Inquadra l'immagine per visualizzare il modello 3D.
-        </p>
-
-
-        <a
-            class="button"
-            href="https://distav.unige.it/en/heritage-lab"
-            target="_blank"
-            rel="noopener noreferrer">
-
-            Scopri Heritage-Lab
-
+        <a id="heritageLink"
+           class="button"
+           href="https://INSERISCI-QUI-IL-LINK-HERITAGE-LAB"
+           target="_blank"
+           rel="noopener noreferrer">
+            Heritage-LAB
         </a>
 
-
-        <a
-            class="button"
-            href="https://sketchfab.com/3d-models/pisa-chiragra-41f6f563ea0448f5bc67f8a6eb767ad2"
-            target="_blank"
-            rel="noopener noreferrer">
-
-            Modello 3D
-
+        <a id="sketchfabLink"
+           class="button"
+           href="#"
+           target="_blank"
+           rel="noopener noreferrer">
+            Visualizza su Sketchfab
         </a>
-
     </div>
 
-
-
-    <!-- -------------------------
-         SCENA AR
-    ------------------------- -->
-
+    <!-- SCENA AR -->
     <a-scene
-
         mindar-image="
             imageTargetSrc: ./targets.mind;
             maxTrack: 1;
@@ -214,487 +146,229 @@
             uiScanning: no;
             uiError: no;
         "
-
         embedded
-
         color-space="sRGB"
-
-        renderer="
-            colorManagement: true,
-            physicallyCorrectLights
-        "
-
+        renderer="colorManagement: true, physicallyCorrectLights"
         vr-mode-ui="enabled: false"
-
         device-orientation-permission-ui="enabled: false">
 
-
-        <!-- CAMERA -->
-
+        <!-- Camera -->
         <a-camera
-
             position="0 0 0"
-
             look-controls="enabled: false">
-
         </a-camera>
 
-
-
-        <!-- -------------------------
-             TARGET
-        ------------------------- -->
-
-        <a-entity
-            mindar-image-target="targetIndex: 0">
-
+        <!-- TARGET 0: IMMAGINE 1 -->
+        <a-entity mindar-image-target="targetIndex: 0">
 
             <a-gltf-model
-
-                id="model"
-
-                src="./Globo.glb"
-
+                id="model1"
+                src="./Pisa_Chiragra.glb"
                 position="0 0 0"
-
-                rotation="0 180 0"
-
+                rotation="0 0 0"
                 scale="20 20 20">
-
             </a-gltf-model>
-
 
         </a-entity>
 
-<a-entity mindar-image-target="targetIndex: 1">
+        <!-- TARGET 1: IMMAGINE 2 -->
+        <a-entity mindar-image-target="targetIndex: 1">
 
-    <a-gltf-model
-        src="./Glyptonotus_Antarcticus.glb"
-        position="0 0 0"
-        rotation="0 0 0"
-        scale="20 20 20">
-    </a-gltf-model>
+            <a-gltf-model
+                id="model2"
+                src="./Modello2.glb"
+                position="0 0 0"
+                rotation="0 0 0"
+                scale="100 100 100">
+            </a-gltf-model>
 
-</a-entity>
+        </a-entity>
 
-
-<a-entity mindar-image-target="targetIndex: 2">
-
-    <a-gltf-model
-        src="./Pisa_Chiragra.glb"
-        position="0 0 0"
-        rotation="0 0 0"
-        scale="20 20 20">
-    </a-gltf-model>
-
-
-<a-entity mindar-image-target="targetIndex: 3">
-
-    <a-gltf-model
-        src="./Vaso.glb"
-        position="0 0 0"
-        rotation="0 0 0"
-        scale="20 20 20">
-    </a-gltf-model>
-    
-</a-entity>
-        
     </a-scene>
 
-
-
-    <!-- -------------------------
-         JAVASCRIPT
-    ------------------------- -->
-
     <script>
+        const loading = document.getElementById("loading");
+        const instruction = document.getElementById("instruction");
+        const interfaceBox = document.getElementById("interface");
 
+        const objectTitle = document.getElementById("objectTitle");
+        const objectDescription = document.getElementById("objectDescription");
+        const sketchfabLink = document.getElementById("sketchfabLink");
 
-        /* =========================
-           ELEMENTI
-        ========================= */
+        const model1 = document.getElementById("model1");
+        const model2 = document.getElementById("model2");
 
-        const loading =
-            document.getElementById("loading");
+        const scene = document.querySelector("a-scene");
 
+        // DATI DEI DUE OGGETTI
+        const objects = {
+            0: {
+                title: "Pisa Chiragra",
+                description: "Breve descrizione 1",
+                model: model1,
+                sketchfab: "INSERISCI-QUI-IL-LINK-SKETCHFAB-DEL-MODELLO-1"
+            },
 
-        const scene =
-            document.querySelector("a-scene");
-
-
-        const model =
-            document.getElementById("model");
-
-
-        const target =
-            document.querySelector(
-                "[mindar-image-target]"
-            );
-
-
-
-        /* =========================
-           LOADING
-        ========================= */
-
-        scene.addEventListener(
-            "arReady",
-            function () {
-
-                loading.style.display = "none";
-
+            1: {
+                title: "Glyptonotus",
+                description: "Breve descrizione 2",
+                model: model2,
+                sketchfab: "INSERISCI-QUI-IL-LINK-SKETCHFAB-DEL-MODELLO-2"
             }
-        );
+        };
 
+        let activeModel = null;
+        let activeTargetIndex = null;
 
+        // Quando MindAR è pronto
+        scene.addEventListener("arReady", function () {
+            loading.style.display = "none";
+        });
 
-        /* =========================
-           TARGET TROVATO
-        ========================= */
+        // Gestione del riconoscimento delle immagini
+        document.querySelectorAll("[mindar-image-target]").forEach(
+            function (targetElement) {
 
-        target.addEventListener(
-            "targetFound",
-            function () {
-
-                console.log(
-                    "Immagine riconosciuta!"
+                const index = Number(
+                    targetElement.getAttribute("mindar-image-target")
+                        .targetIndex
                 );
 
+                targetElement.addEventListener("targetFound", function () {
+                    const data = objects[index];
+
+                    if (!data) return;
+
+                    activeTargetIndex = index;
+                    activeModel = data.model;
+
+                    objectTitle.textContent = data.title;
+                    objectDescription.textContent = data.description;
+                    sketchfabLink.href = data.sketchfab;
+
+                    instruction.style.display = "none";
+                    interfaceBox.style.display = "block";
+
+                    console.log("Immagine riconosciuta:", data.title);
+                });
+
+                targetElement.addEventListener("targetLost", function () {
+                    // Evita di nascondere l'interfaccia di un altro target
+                    if (activeTargetIndex !== index) return;
+
+                    activeTargetIndex = null;
+                    activeModel = null;
+
+                    interfaceBox.style.display = "none";
+                    instruction.style.display = "block";
+
+                    console.log("Immagine non più visibile.");
+                });
             }
         );
 
-
-
-        /* =========================
-           TARGET PERSO
-        ========================= */
-
-        target.addEventListener(
-            "targetLost",
-            function () {
-
-                console.log(
-                    "Immagine persa."
-                );
-
-            }
-        );
-
-
-
-        /* =========================
-           CONTROLLI TOUCH
-        ========================= */
-
-
-        let isDragging = false;
-
+        // GESTI TOUCH: ROTAZIONE E ZOOM
         let previousX = 0;
-
         let previousY = 0;
+        let previousDistance = 0;
+        let currentScale = 100;
 
-
-        /* Scala iniziale */
-
-        let currentScale = 20;
-
-
-        /* Limiti dello zoom */
-
-        const MIN_SCALE = 5;
-
+        const MIN_SCALE = 20;
         const MAX_SCALE = 300;
-
-
-        /* Distanza tra due dita */
-
-        let initialPinchDistance = null;
-
-        let initialPinchScale = currentScale;
-
-
-
-        /* =========================
-           FUNZIONE:
-           DISTANZA TRA DUE DITA
-        ========================= */
+        const ROTATION_SPEED = 0.5;
 
         function getDistance(touch1, touch2) {
+            const dx = touch2.clientX - touch1.clientX;
+            const dy = touch2.clientY - touch1.clientY;
 
-            const dx =
-                touch1.clientX - touch2.clientX;
-
-            const dy =
-                touch1.clientY - touch2.clientY;
-
-            return Math.sqrt(
-                dx * dx + dy * dy
-            );
-
+            return Math.sqrt(dx * dx + dy * dy);
         }
 
+        function updateModelScale() {
+            if (!activeModel) return;
 
+            activeModel.setAttribute(
+                "scale",
+                `${currentScale} ${currentScale} ${currentScale}`
+            );
+        }
 
-        /* =========================
-           TOUCH START
-        ========================= */
+        document.addEventListener("touchstart", function (event) {
+            if (!activeModel) return;
 
-        document.addEventListener(
-            "touchstart",
-            function (event) {
+            if (event.target.closest("#interface")) return;
 
+            if (event.touches.length === 1) {
+                previousX = event.touches[0].clientX;
+                previousY = event.touches[0].clientY;
+            }
 
-                /* Ignora i tocchi
-                   sull'interfaccia */
+            if (event.touches.length === 2) {
+                previousDistance = getDistance(
+                    event.touches[0],
+                    event.touches[1]
+                );
+            }
+        }, { passive: false });
 
-                if (
-                    event.target.closest("#interface")
-                ) {
+        document.addEventListener("touchmove", function (event) {
+            if (!activeModel) return;
 
-                    return;
+            if (event.target.closest("#interface")) return;
 
-                }
-
-
-                /* -------------------------
-                   UN DITO
-                ------------------------- */
-
-                if (
-                    event.touches.length === 1
-                ) {
-
-                    isDragging = true;
-
-                    previousX =
-                        event.touches[0].clientX;
-
-                    previousY =
-                        event.touches[0].clientY;
-
-                }
-
-
-                /* -------------------------
-                   DUE DITA
-                ------------------------- */
-
-                if (
-                    event.touches.length === 2
-                ) {
-
-                    isDragging = false;
-
-
-                    initialPinchDistance =
-                        getDistance(
-                            event.touches[0],
-                            event.touches[1]
-                        );
-
-
-                    initialPinchScale =
-                        currentScale;
-
-                }
-
-            },
-            { passive: false }
-        );
-
-
-
-        /* =========================
-           TOUCH MOVE
-        ========================= */
-
-        document.addEventListener(
-            "touchmove",
-            function (event) {
-
-
-                /* Ignora l'interfaccia */
-
-                if (
-                    event.target.closest("#interface")
-                ) {
-
-                    return;
-
-                }
-
-
+            if (event.touches.length === 1) {
                 event.preventDefault();
 
+                const touch = event.touches[0];
 
+                const deltaX = touch.clientX - previousX;
+                const deltaY = touch.clientY - previousY;
 
-                /* =====================
-                   ROTAZIONE
-                ===================== */
+                const rotation = activeModel.getAttribute("rotation");
 
-                if (
-                    event.touches.length === 1 &&
-                    isDragging
-                ) {
+                rotation.y += deltaX * ROTATION_SPEED;
+                rotation.x -= deltaY * ROTATION_SPEED;
 
+                activeModel.setAttribute("rotation", rotation);
 
-                    const currentX =
-                        event.touches[0].clientX;
-
-
-                    const currentY =
-                        event.touches[0].clientY;
-
-
-                    const deltaX =
-                        currentX - previousX;
-
-
-                    const deltaY =
-                        currentY - previousY;
-
-
-                    /* Recuperiamo la rotazione
-                       attuale */
-
-                    const rotation =
-                        model.getAttribute(
-                            "rotation"
-                        );
-
-
-                    /*
-                     * Movimento orizzontale:
-                     * rotazione Y
-                     */
-
-                    rotation.y +=
-                        deltaX * 0.5;
-
-
-                    /*
-                     * Movimento verticale:
-                     * rotazione X
-                     */
-
-                    rotation.x -=
-                        deltaY * 0.5;
-
-
-                    model.setAttribute(
-                        "rotation",
-                        rotation
-                    );
-
-
-                    previousX = currentX;
-
-                    previousY = currentY;
-
-                }
-
-
-
-                /* =====================
-                   PINCH ZOOM
-                ===================== */
-
-                if (
-                    event.touches.length === 2 &&
-                    initialPinchDistance !== null
-                ) {
-
-
-                    const currentDistance =
-                        getDistance(
-                            event.touches[0],
-                            event.touches[1]
-                        );
-
-
-                    const scaleFactor =
-                        currentDistance /
-                        initialPinchDistance;
-
-
-                    currentScale =
-                        initialPinchScale *
-                        scaleFactor;
-
-
-                    /* Limiti */
-
-                    currentScale =
-                        Math.max(
-                            MIN_SCALE,
-                            Math.min(
-                                MAX_SCALE,
-                                currentScale
-                            )
-                        );
-
-
-                    /* Applica la scala */
-
-                    model.setAttribute(
-                        "scale",
-                        `${currentScale} ${currentScale} ${currentScale}`
-                    );
-
-                }
-
-            },
-            { passive: false }
-        );
-
-
-
-        /* =========================
-           TOUCH END
-        ========================= */
-
-        document.addEventListener(
-            "touchend",
-            function (event) {
-
-
-                if (
-                    event.touches.length === 0
-                ) {
-
-                    isDragging = false;
-
-                    initialPinchDistance = null;
-
-                }
-
-
-                /*
-                 * Se rimane un dito dopo
-                 * il pinch, ripartiamo
-                 * dalla sua posizione.
-                 */
-
-                if (
-                    event.touches.length === 1
-                ) {
-
-                    isDragging = true;
-
-                    previousX =
-                        event.touches[0].clientX;
-
-                    previousY =
-                        event.touches[0].clientY;
-
-                }
-
+                previousX = touch.clientX;
+                previousY = touch.clientY;
             }
-        );
 
+            if (event.touches.length === 2) {
+                event.preventDefault();
 
+                const newDistance = getDistance(
+                    event.touches[0],
+                    event.touches[1]
+                );
+
+                if (previousDistance > 0) {
+                    const factor = newDistance / previousDistance;
+
+                    currentScale = Math.max(
+                        MIN_SCALE,
+                        Math.min(MAX_SCALE, currentScale * factor)
+                    );
+
+                    updateModelScale();
+                }
+
+                previousDistance = newDistance;
+            }
+        }, { passive: false });
+
+        document.addEventListener("touchend", function (event) {
+            if (event.touches.length < 2) {
+                previousDistance = 0;
+            }
+
+            if (event.touches.length === 1) {
+                previousX = event.touches[0].clientX;
+                previousY = event.touches[0].clientY;
+            }
+        }, { passive: false });
     </script>
-
 
 </body>
 </html>
