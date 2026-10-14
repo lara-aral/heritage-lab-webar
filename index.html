@@ -239,6 +239,16 @@ console.log(
                         .targetIndex
                 );
 
+                console.log("Target inizializzato:", index);
+
+targetElement.addEventListener("targetFound", function() {
+  console.log("EVENTO targetFound:", index);
+});
+
+targetElement.addEventListener("targetLost", function() {
+  console.log("EVENTO targetLost:", index);
+});
+
                 targetElement.addEventListener("targetFound", function () {
                     const data = objects[index];
 
