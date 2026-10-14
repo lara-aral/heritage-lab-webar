@@ -35,6 +35,9 @@
             touch-action: none;
         }
 
+        a-scene, canvas {
+  touch-action: none;
+}
 
         /* -------------------------
            INTERFACCIA
@@ -253,7 +256,7 @@
         <a-gltf-model rotation="0 180 0 " position="0 0 0" scale="20 20 20" src="#Pisa" animation-mixer>
       </a-entity>
       <a-entity mindar-image-target="targetIndex: 1">
-        <a-gltf-model rotation="0 0 0 " position="0 0 0" scale="10 10 10" src="#Glyptonotus" animation-mixer>
+        <a-gltf-model rotation="0 0 0 " position="0 0 0" scale="0.7 0.7 0.7" src="#Glyptonotus" animation-mixer>
       </a-entity>
 
 
@@ -267,390 +270,207 @@
 
     <script>
 
+/* =========================
+   ELEMENTI
+========================= */
 
-        /* =========================
-           ELEMENTI
-        ========================= */
+const loading = document.getElementById("loading");
+const scene = document.querySelector("a-scene");
 
-        const loading =
-            document.getElementById("loading");
+let activeModel = null;
+let activeTarget = null;
 
+/* Stato dei gesti touch */
+let isDragging = false;
+let previousX = 0;
+let previousY = 0;
 
-        const scene =
-            document.querySelector("a-scene");
+let initialPinchDistance = null;
+let initialPinchScale = 1;
 
+/* Limiti dello zoom rispetto alla scala iniziale */
+const MIN_ZOOM_FACTOR = 0.25;
+const MAX_ZOOM_FACTOR = 4;
 
-        const model =
-            document.getElementById("model");
+let modelBaseScale = 1;
 
 
-        const target =
-            document.querySelector(
-                "[mindar-image-target]"
-            );
+/* =========================
+   LOADING
+========================= */
 
+scene.addEventListener("arReady", function () {
+  loading.style.display = "none";
+});
 
 
-        /* =========================
-           LOADING
-        ========================= */
+/* =========================
+   GESTIONE DI ENTRAMBI I TARGET
+========================= */
 
-        scene.addEventListener(
-            "arReady",
-            function () {
+document.querySelectorAll("[mindar-image-target]").forEach(function (target) {
+  const model = target.querySelector("a-gltf-model");
 
-                loading.style.display = "none";
+  if (!model) {
+    console.error("Nessun modello 3D trovato nel target:", target);
+    return;
+  }
 
-            }
-        );
+  target.addEventListener("targetFound", function () {
+    activeTarget = target;
+    activeModel = model;
 
+    const scale = model.getAttribute("scale");
+    modelBaseScale = scale.x;
 
+    initialPinchDistance = null;
+    isDragging = false;
 
-        /* =========================
-           TARGET TROVATO
-        ========================= */
+    console.log("Immagine riconosciuta. Modello attivo:", model);
+  });
 
-        target.addEventListener(
-            "targetFound",
-            function () {
+  target.addEventListener("targetLost", function () {
+    if (activeTarget !== target) return;
 
-                console.log(
-                    "Immagine riconosciuta!"
-                );
+    activeTarget = null;
+    activeModel = null;
 
-            }
-        );
+    initialPinchDistance = null;
+    isDragging = false;
 
+    console.log("Immagine persa.");
+  });
+});
 
 
-        /* =========================
-           TARGET PERSO
-        ========================= */
+/* =========================
+   DISTANZA TRA DUE DITA
+========================= */
 
-        target.addEventListener(
-            "targetLost",
-            function () {
+function getDistance(touch1, touch2) {
+  const dx = touch1.clientX - touch2.clientX;
+  const dy = touch1.clientY - touch2.clientY;
 
-                console.log(
-                    "Immagine persa."
-                );
+  return Math.sqrt(dx * dx + dy * dy);
+}
 
-            }
-        );
 
+/* =========================
+   TOUCH START
+========================= */
 
+document.addEventListener("touchstart", function (event) {
+  if (!activeModel) return;
 
-        /* =========================
-           CONTROLLI TOUCH
-        ========================= */
+  if (event.target.closest("#interface")) return;
 
+  if (event.touches.length === 1) {
+    isDragging = true;
 
-        let isDragging = false;
+    previousX = event.touches[0].clientX;
+    previousY = event.touches[0].clientY;
+  }
 
-        let previousX = 0;
+  if (event.touches.length === 2) {
+    isDragging = false;
 
-        let previousY = 0;
+    initialPinchDistance = getDistance(
+      event.touches[0],
+      event.touches[1]
+    );
 
+    initialPinchScale = activeModel.getAttribute("scale").x;
+  }
+}, { passive: true });
 
-        /* Scala iniziale */
 
-        let currentScale = 20;
+/* =========================
+   TOUCH MOVE
+========================= */
 
+document.addEventListener("touchmove", function (event) {
+  if (!activeModel) return;
 
-        /* Limiti dello zoom */
+  if (event.target.closest("#interface")) return;
 
-        const MIN_SCALE = 5;
+  if (event.touches.length === 1 && isDragging) {
+    event.preventDefault();
 
-        const MAX_SCALE = 300;
+    const touch = event.touches[0];
 
+    const deltaX = touch.clientX - previousX;
+    const deltaY = touch.clientY - previousY;
 
-        /* Distanza tra due dita */
+    const rotation = activeModel.getAttribute("rotation");
 
-        let initialPinchDistance = null;
+    activeModel.setAttribute("rotation", {
+      x: rotation.x - deltaY * 0.5,
+      y: rotation.y + deltaX * 0.5,
+      z: rotation.z
+    });
 
-        let initialPinchScale = currentScale;
+    previousX = touch.clientX;
+    previousY = touch.clientY;
+  }
 
+  if (
+    event.touches.length === 2 &&
+    initialPinchDistance !== null &&
+    initialPinchDistance > 0
+  ) {
+    event.preventDefault();
 
+    const currentDistance = getDistance(
+      event.touches[0],
+      event.touches[1]
+    );
 
-        /* =========================
-           FUNZIONE:
-           DISTANZA TRA DUE DITA
-        ========================= */
+    const factor = currentDistance / initialPinchDistance;
 
-        function getDistance(touch1, touch2) {
+    const minScale = modelBaseScale * MIN_ZOOM_FACTOR;
+    const maxScale = modelBaseScale * MAX_ZOOM_FACTOR;
 
-            const dx =
-                touch1.clientX - touch2.clientX;
+    const newScale = Math.max(
+      minScale,
+      Math.min(maxScale, initialPinchScale * factor)
+    );
 
-            const dy =
-                touch1.clientY - touch2.clientY;
+    activeModel.setAttribute("scale", {
+      x: newScale,
+      y: newScale,
+      z: newScale
+    });
+  }
+}, { passive: false });
 
-            return Math.sqrt(
-                dx * dx + dy * dy
-            );
 
-        }
+/* =========================
+   TOUCH END
+========================= */
 
+document.addEventListener("touchend", function (event) {
+  initialPinchDistance = null;
 
+  if (event.touches.length === 0) {
+    isDragging = false;
+  } else if (event.touches.length === 1 && activeModel) {
+    /* Se rimane un dito dopo il pinch,
+       riparte dalla sua posizione. */
 
-        /* =========================
-           TOUCH START
-        ========================= */
+    isDragging = true;
 
-        document.addEventListener(
-            "touchstart",
-            function (event) {
+    previousX = event.touches[0].clientX;
+    previousY = event.touches[0].clientY;
+  }
+}, { passive: true });
 
 
-                /* Ignora i tocchi
-                   sull'interfaccia */
+document.addEventListener("touchcancel", function () {
+  isDragging = false;
+  initialPinchDistance = null;
+}, { passive: true });
 
-                if (
-                    event.target.closest("#interface")
-                ) {
-
-                    return;
-
-                }
-
-
-                /* -------------------------
-                   UN DITO
-                ------------------------- */
-
-                if (
-                    event.touches.length === 1
-                ) {
-
-                    isDragging = true;
-
-                    previousX =
-                        event.touches[0].clientX;
-
-                    previousY =
-                        event.touches[0].clientY;
-
-                }
-
-
-                /* -------------------------
-                   DUE DITA
-                ------------------------- */
-
-                if (
-                    event.touches.length === 2
-                ) {
-
-                    isDragging = false;
-
-
-                    initialPinchDistance =
-                        getDistance(
-                            event.touches[0],
-                            event.touches[1]
-                        );
-
-
-                    initialPinchScale =
-                        currentScale;
-
-                }
-
-            },
-            { passive: false }
-        );
-
-
-
-        /* =========================
-           TOUCH MOVE
-        ========================= */
-
-        document.addEventListener(
-            "touchmove",
-            function (event) {
-
-
-                /* Ignora l'interfaccia */
-
-                if (
-                    event.target.closest("#interface")
-                ) {
-
-                    return;
-
-                }
-
-
-                event.preventDefault();
-
-
-
-                /* =====================
-                   ROTAZIONE
-                ===================== */
-
-                if (
-                    event.touches.length === 1 &&
-                    isDragging
-                ) {
-
-
-                    const currentX =
-                        event.touches[0].clientX;
-
-
-                    const currentY =
-                        event.touches[0].clientY;
-
-
-                    const deltaX =
-                        currentX - previousX;
-
-
-                    const deltaY =
-                        currentY - previousY;
-
-
-                    /* Recuperiamo la rotazione
-                       attuale */
-
-                    const rotation =
-                        model.getAttribute(
-                            "rotation"
-                        );
-
-
-                    /*
-                     * Movimento orizzontale:
-                     * rotazione Y
-                     */
-
-                    rotation.y +=
-                        deltaX * 0.5;
-
-
-                    /*
-                     * Movimento verticale:
-                     * rotazione X
-                     */
-
-                    rotation.x -=
-                        deltaY * 0.5;
-
-
-                    model.setAttribute(
-                        "rotation",
-                        rotation
-                    );
-
-
-                    previousX = currentX;
-
-                    previousY = currentY;
-
-                }
-
-
-
-                /* =====================
-                   PINCH ZOOM
-                ===================== */
-
-                if (
-                    event.touches.length === 2 &&
-                    initialPinchDistance !== null
-                ) {
-
-
-                    const currentDistance =
-                        getDistance(
-                            event.touches[0],
-                            event.touches[1]
-                        );
-
-
-                    const scaleFactor =
-                        currentDistance /
-                        initialPinchDistance;
-
-
-                    currentScale =
-                        initialPinchScale *
-                        scaleFactor;
-
-
-                    /* Limiti */
-
-                    currentScale =
-                        Math.max(
-                            MIN_SCALE,
-                            Math.min(
-                                MAX_SCALE,
-                                currentScale
-                            )
-                        );
-
-
-                    /* Applica la scala */
-
-                    model.setAttribute(
-                        "scale",
-                        `${currentScale} ${currentScale} ${currentScale}`
-                    );
-
-                }
-
-            },
-            { passive: false }
-        );
-
-
-
-        /* =========================
-           TOUCH END
-        ========================= */
-
-        document.addEventListener(
-            "touchend",
-            function (event) {
-
-
-                if (
-                    event.touches.length === 0
-                ) {
-
-                    isDragging = false;
-
-                    initialPinchDistance = null;
-
-                }
-
-
-                /*
-                 * Se rimane un dito dopo
-                 * il pinch, ripartiamo
-                 * dalla sua posizione.
-                 */
-
-                if (
-                    event.touches.length === 1
-                ) {
-
-                    isDragging = true;
-
-                    previousX =
-                        event.touches[0].clientX;
-
-                    previousY =
-                        event.touches[0].clientY;
-
-                }
-
-            }
-        );
-
-
+        
     </script>
 
 
