@@ -236,7 +236,9 @@
 scene.addEventListener("loaded", function () {
   document.querySelectorAll("[mindar-image-target]").forEach(function (targetElement) {
     const component = targetElement.components["mindar-image-target"];
-    const index = Number(component?.data?.targetIndex);
+   const index = Number(
+  targetElement.components["mindar-image-target"].data.targetIndex
+);
 
     console.log("Target inizializzato:", index);
 
