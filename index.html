@@ -1,401 +1,102 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-  </head>
-    
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Heritage-LAB WebAR</title>
+  <title>WebAR - Modelli 3D</title>
 
-    <!-- A-Frame -->
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <!-- A-Frame -->
+  <script src="https://cdn.jsdelivr.net/npm/aframe@1.5.0/dist/aframe.min.js"></script>
 
-    <!-- qualcosa che ha mindar -->
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
+  <!-- MindAR per il riconoscimento delle immagini -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
-    <!-- MindAR -->
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
 
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            font-family: Arial, sans-serif;
-            touch-action: none;
-        }
+    body {
+      font-family: sans-serif;
+      background: #000;
+    }
 
-        /* Messaggio iniziale */
-        #instruction {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 85%;
-            max-width: 420px;
-            box-sizing: border-box;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            text-align: center;
-            font-size: 20px;
-            line-height: 1.5;
-            border-radius: 12px;
-            z-index: 1000;
-        }
-
-        /* Scheda informativa del modello */
-        #interface {
-            display: none;
-            position: fixed;
-            left: 0;
-            bottom: 0;
-            width: 100%;
-            box-sizing: border-box;
-            padding: 18px;
-            background: rgba(0, 0, 0, 0.78);
-            color: white;
-            z-index: 1000;
-            touch-action: auto;
-        }
-
-        #interface h1 {
-            margin: 0 0 8px 0;
-            font-size: 22px;
-        }
-
-        #interface p {
-            margin: 0 0 15px 0;
-            font-size: 15px;
-            line-height: 1.4;
-        }
-
-        .button {
-            display: inline-block;
-            padding: 12px 15px;
-            margin: 0 6px 6px 0;
-            border-radius: 8px;
-            border: none;
-            background: white;
-            color: black;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        .button:hover {
-            opacity: 0.85;
-        }
-
-        /* Schermata di caricamento */
-        #loading {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #111;
-            color: white;
-            z-index: 2000;
-            font-size: 18px;
-        }
-    </style>
+    a-scene {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+  </style>
 </head>
 
 <body>
 
-    <!-- Schermata iniziale di caricamento -->
-    <div id="loading">
-        Avvio della realtà aumentata...
-    </div>
-
-    <!-- Messaggio mostrato quando nessuna immagine è riconosciuta -->
-    <div id="instruction">
-        Inquadra l'immagine sul fronte della carta per iniziare
-    </div>
-
-    <!-- Interfaccia dinamica -->
-    <div id="interface">
-        <h1 id="objectTitle"></h1>
-
-        <p id="objectDescription"></p>
-
-        <a id="heritageLink"
-           class="button"
-           href="https://INSERISCI-QUI-IL-LINK-HERITAGE-LAB"
-           target="_blank"
-           rel="noopener noreferrer">
-            Heritage-LAB
-        </a>
-
-        <a id="sketchfabLink"
-           class="button"
-           href="#"
-           target="_blank"
-           rel="noopener noreferrer">
-            Visualizza su Sketchfab
-        </a>
-    </div>
-
-    <!-- SCENA AR -->
-    <a-scene mindar-image="
-            imageTargetSrc: ./targets.mind;
-            maxTrack: 1;
-            uiLoading: no;
-            uiScanning: no;
-            uiError: no;
-        "
-        embedded
-        color-space="sRGB"
-        renderer="colorManagement: true, physicallyCorrectLights"
-        vr-mode-ui="enabled: false"
-        device-orientation-permission-ui="enabled: false">
-
-        <!-- Camera -->
-        <a-camera
-            position="0 0 0"
-            look-controls="enabled: false">
-        </a-camera>
-
-        <!-- TARGET 0: IMMAGINE 1 -->
-        <a-entity mindar-image-target="targetIndex: 0">
-
-            <a-gltf-model
-                id="model1"
-                src="./Pisa_Chiragra.glb"
-                position="0 0 0"
-                rotation="0 180 0"
-                scale="20 20 20">
-            </a-gltf-model>
-
-        </a-entity>
-
-        <!-- TARGET 1: IMMAGINE 2 -->
-        <a-entity mindar-image-target="targetIndex: 1">
-
-            <a-gltf-model
-                id="model2"
-                src="./Glyptonotus_Antarcticus.glb"
-                position="0 0 0"
-                rotation="0 0 0"
-                scale="20 20 20">
-            </a-gltf-model>
-
-        </a-entity>
-
-    </a-scene>
-
-    <script>
-        const loading = document.getElementById("loading");
-        const instruction = document.getElementById("instruction");
-        const interfaceBox = document.getElementById("interface");
-
-        const objectTitle = document.getElementById("objectTitle");
-        const objectDescription = document.getElementById("objectDescription");
-        const sketchfabLink = document.getElementById("sketchfabLink");
-
-        const model1 = document.getElementById("model1");
-        const model2 = document.getElementById("model2");
-
-        const scene = document.querySelector("a-scene");
-
-        // DATI DEI DUE OGGETTI
-        const objects = {
-            0: {
-                title: "Pisa Chiragra",
-                description: "Breve descrizione 1",
-                model: model1,
-                sketchfab: "INSERISCI-QUI-IL-LINK-SKETCHFAB-DEL-MODELLO-1"
-            },
-
-            1: {
-                title: "Glyptonotus",
-                description: "Breve descrizione 2",
-                model: model2,
-                sketchfab: "INSERISCI-QUI-IL-LINK-SKETCHFAB-DEL-MODELLO-2"
-            }
-        };
-
-        let activeModel = null;
-        let activeTargetIndex = null;
-
-        // Quando MindAR è pronto
-        scene.addEventListener("arReady", function () {
-            loading.style.display = "none";
-        });
-
-        // Gestione del riconoscimento delle immagini
-        
-       
-scene.addEventListener("loaded", function () {
- 
-document.querySelectorAll("[mindar-image-target]").forEach(function (targetElement, index) {
-  console.log("Target inizializzato:", index);
-
-  targetElement.addEventListener("targetFound", function () {
-    const data = objects[index];
-
-    if (!data) {
-      console.error("Nessun oggetto associato al target:", index);
-      return;
-    }
-
-    console.log("Carta riconosciuta:", data.title);
-
-    activeTargetIndex = index;
-    setActiveModel(data.model);
-
-    objectTitle.textContent = data.title;
-    objectDescription.textContent = data.description;
-    sketchfabLink.href = data.sketchfab;
-
-    instruction.style.display = "none";
-    interfaceBox.style.display = "block";
-  });
-
-  targetElement.addEventListener("targetLost", function () {
-    if (activeTargetIndex !== index) return;
-
-    activeTargetIndex = null;
-    activeModel = null;
-
-    interfaceBox.style.display = "none";
-    instruction.style.display = "block";
-  });
-});
-
-    
-       // GESTI TOUCH: ROTAZIONE E ZOOM
-
-let previousX = 0;
-let previousY = 0;
-let previousDistance = 0;
-
-let currentScale = 100;
-
-const MIN_SCALE = 20;
-const MAX_SCALE = 300;
-const ROTATION_SPEED = 0.5;
-
-// Quando riconosciamo un modello, leggiamo la sua scala reale
-function setActiveModel(model) {
-    activeModel = model;
-
-    const scale = model.getAttribute("scale");
-    currentScale = scale.x;
-
-    previousDistance = 0;
-}
-
-// Distanza tra due dita
-function getDistance(touch1, touch2) {
-    const dx = touch2.clientX - touch1.clientX;
-    const dy = touch2.clientY - touch1.clientY;
-
-    return Math.sqrt(dx * dx + dy * dy);
-}
-
-// Aggiorna la scala del modello attivo
-function updateModelScale() {
-    if (!activeModel) return;
-
-    activeModel.setAttribute("scale", {
-        x: currentScale,
-        y: currentScale,
-        z: currentScale
-    });
-}
-
-// Inizio del tocco
-document.addEventListener("touchstart", function(event) {
-    if (!activeModel) return;
-
-    if (event.target.closest("#interface")) return;
-
-    if (event.touches.length === 1) {
-        previousX = event.touches[0].clientX;
-        previousY = event.touches[0].clientY;
-    }
-
-    if (event.touches.length === 2) {
-        previousDistance = getDistance(
-            event.touches[0],
-            event.touches[1]
-        );
-    }
-}, { passive: false });
-
-// Movimento delle dita
-document.addEventListener("touchmove", function(event) {
-    if (!activeModel) return;
-
-    if (event.target.closest("#interface")) return;
-
-    // UN DITO: ROTAZIONE
-    if (event.touches.length === 1) {
-        event.preventDefault();
-
-        const touch = event.touches[0];
-
-        const deltaX = touch.clientX - previousX;
-        const deltaY = touch.clientY - previousY;
-
-        const rotation = activeModel.getAttribute("rotation");
-
-        rotation.y += deltaX * ROTATION_SPEED;
-        rotation.x -= deltaY * ROTATION_SPEED;
-
-        activeModel.setAttribute("rotation", rotation);
-
-        previousX = touch.clientX;
-        previousY = touch.clientY;
-    }
-
-    // DUE DITA: ZOOM
-    if (event.touches.length === 2) {
-        event.preventDefault();
-
-        const newDistance = getDistance(
-            event.touches[0],
-            event.touches[1]
-        );
-
-        if (previousDistance > 0) {
-            const factor = newDistance / previousDistance;
-
-            currentScale = Math.max(
-                MIN_SCALE,
-                Math.min(MAX_SCALE, currentScale * factor)
-            );
-
-            updateModelScale();
-        }
-
-        previousDistance = newDistance;
-    }
-}, { passive: false });
-
-// Fine del tocco
-document.addEventListener("touchend", function(event) {
-    previousDistance = 0;
-
-    if (event.touches.length === 1) {
-        previousX = event.touches[0].clientX;
-        previousY = event.touches[0].clientY;
-    }
-}, { passive: false });
-
-// Annullamento del tocco, ad esempio se interviene il browser
-document.addEventListener("touchcancel", function() {
-    previousDistance = 0;
-}, { passive: false });
-    </script>
+  <a-scene
+    mindar-image="
+      imageTargetSrc: ./targets.mind;
+      autoStart: true;
+      uiLoading: yes;
+      uiScanning: yes;
+      uiError: yes;
+    "
+    color-space="sRGB"
+    renderer="colorManagement: true"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: false"
+    embedded
+  >
+
+    <!-- Modelli 3D -->
+    <a-assets>
+      <a-asset-item
+        id="modello1"
+        src="./modello1.glb">
+      </a-asset-item>
+
+      <a-asset-item
+        id="modello2"
+        src="./modello2.glb">
+      </a-asset-item>
+    </a-assets>
+
+    <!-- Telecamera -->
+    <a-camera
+      position="0 0 0"
+      look-controls="enabled: false">
+    </a-camera>
+
+    <!-- TARGET 0: prima immagine -->
+    <a-entity mindar-image-target="targetIndex: 0">
+
+      <a-gltf-model
+        src="#modello1"
+        position="0 0 0"
+        rotation="0 0 0"
+        scale="0.1 0.1 0.1">
+      </a-gltf-model>
+
+    </a-entity>
+
+    <!-- TARGET 1: seconda immagine -->
+    <a-entity mindar-image-target="targetIndex: 1">
+
+      <a-gltf-model
+        src="#modello2"
+        position="0 0 0"
+        rotation="0 0 0"
+        scale="0.1 0.1 0.1">
+      </a-gltf-model>
+
+    </a-entity>
+
+  </a-scene>
 
 </body>
 </html>
