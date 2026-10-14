@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  </head>
+    
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, user-scalable=no">
@@ -9,6 +12,9 @@
 
     <!-- A-Frame -->
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+    <!-- qualcosa che ha mindar -->
+    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v7.0.0/dist/aframe-extras.min.js"></script>
 
     <!-- MindAR -->
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
@@ -138,8 +144,7 @@
     </div>
 
     <!-- SCENA AR -->
-    <a-scene
-        mindar-image="
+    <a-scene mindar-image="
             imageTargetSrc: ./targets.mind;
             maxTrack: 1;
             uiLoading: no;
@@ -226,11 +231,7 @@
         });
 
         // Gestione del riconoscimento delle immagini
-        console.log("JavaScript avviato");
-console.log(
-    "Target trovati nel DOM:",
-    document.querySelectorAll("[mindar-image-target]").length
-);
+        
         document.querySelectorAll("[mindar-image-target]").forEach(
             function (targetElement) {
 
