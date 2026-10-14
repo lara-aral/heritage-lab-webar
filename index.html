@@ -234,51 +234,41 @@
         
        
 scene.addEventListener("loaded", function () {
-  document.querySelectorAll("[mindar-image-target]").forEach(function (targetElement) {
-    const component = targetElement.components["mindar-image-target"];
-   const index = Number(
-  targetElement.components["mindar-image-target"].data.targetIndex
-);
+ 
+document.querySelectorAll("[mindar-image-target]").forEach(function (targetElement, index) {
+  console.log("Target inizializzato:", index);
 
-    console.log("Target inizializzato:", index);
+  targetElement.addEventListener("targetFound", function () {
+    const data = objects[index];
 
-    if (!Number.isInteger(index) || !objects[index]) {
-      console.error("Target non valido:", index, component?.data);
+    if (!data) {
+      console.error("Nessun oggetto associato al target:", index);
       return;
     }
 
-    targetElement.addEventListener("targetFound", function () {
-      console.log("targetFound:", index);
+    console.log("Carta riconosciuta:", data.title);
 
-      const data = objects[index];
+    activeTargetIndex = index;
+    setActiveModel(data.model);
 
-      activeTargetIndex = index;
-      setActiveModel(data.model);
+    objectTitle.textContent = data.title;
+    objectDescription.textContent = data.description;
+    sketchfabLink.href = data.sketchfab;
 
-      objectTitle.textContent = data.title;
-      objectDescription.textContent = data.description;
-      sketchfabLink.href = data.sketchfab;
+    instruction.style.display = "none";
+    interfaceBox.style.display = "block";
+  });
 
-      instruction.style.display = "none";
-      interfaceBox.style.display = "block";
+  targetElement.addEventListener("targetLost", function () {
+    if (activeTargetIndex !== index) return;
 
-      console.log("Interfaccia aggiornata:", data.title);
-    });
+    activeTargetIndex = null;
+    activeModel = null;
 
-    targetElement.addEventListener("targetLost", function () {
-      if (activeTargetIndex !== index) return;
-
-      activeTargetIndex = null;
-      activeModel = null;
-
-      interfaceBox.style.display = "none";
-      instruction.style.display = "block";
-
-      console.log("Target perso:", index);
-    });
+    interfaceBox.style.display = "none";
+    instruction.style.display = "block";
   });
 });
-
 
     
        // GESTI TOUCH: ROTAZIONE E ZOOM
