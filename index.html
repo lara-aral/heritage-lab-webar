@@ -207,7 +207,8 @@
          SCENA AR
     ------------------------- -->
 
-    <a-scene
+
+<a-scene
 
         mindar-image="
             imageTargetSrc: ./targets.mind;
@@ -215,6 +216,10 @@
             uiLoading: no;
             uiScanning: no;
             uiError: no;
+            filterMinCF: 0.0001;
+            filterBeta: 0.001;
+            warmupTolerance: 1;
+            missTolerance: 1;
         "
 
         embedded
